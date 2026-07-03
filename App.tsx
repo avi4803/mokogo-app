@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -17,11 +17,33 @@ import { sampleListings } from './src/data/sampleData';
 import { ListingCard } from './src/components/ListingCard';
 import { SearchBar } from './src/components/SearchBar';
 import { EmptyState } from './src/components/EmptyState';
+import { Loader } from './src/components/Loader';
 
 export default function App() {
   const [favorites, setFavorites] = useState<string[]>(['2', '4']); // Sample pre-favorited listings
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Debounce search query updates to avoid triggering loader on every single keystroke.
+  // This delays the filtering/searching until the user has stopped typing for 400ms.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 400); // 400ms typing delay/debounce duration
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Trigger simulated fetch loader when debounced search query or selected category chip changes.
+  // This gives a premium network-fetching feel with the animated M loader.
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000); // Simulated network load duration (750ms)
+    return () => clearTimeout(timer);
+  }, [debouncedSearchQuery, selectedCategory]);
 
   // Toggle favorite handler
   const handleToggleFavorite = (id: string) => {
@@ -33,7 +55,7 @@ export default function App() {
   // Categories based on Mokogo room types
   const categories = ['All', 'Private', 'Shared', 'Furnished', 'Unfurnished'];
 
-  // Combined search and category filtering
+  // Combined category chips and debounced text search filtering
   const filteredListings = sampleListings.filter((listing) => {
     const matchesCategory =
       selectedCategory === 'All' ||
@@ -43,9 +65,9 @@ export default function App() {
       (selectedCategory === 'Unfurnished' && !listing.furnished);
 
     const matchesSearch =
-      listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      listing.locality.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      listing.city.toLowerCase().includes(searchQuery.toLowerCase());
+      listing.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+      listing.locality.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+      listing.city.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
 
     return matchesCategory && matchesSearch;
   });
@@ -125,8 +147,10 @@ export default function App() {
           <Text style={styles.sectionTitleText}>Recommend for You</Text>
         </View>
 
-        {/* Listings Feed Cards list or Empty State */}
-        {filteredListings.length > 0 ? (
+        {/* Listings Feed Cards list or Loader or Empty State */}
+        {isLoading ? (
+          <Loader message={searchQuery ? `Searching for "${searchQuery}"...` : "Refreshing listings..."} />
+        ) : filteredListings.length > 0 ? (
           filteredListings.map((listing) => (
             <ListingCard
               key={listing.id}
