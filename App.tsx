@@ -18,6 +18,7 @@ import { ListingCard } from './src/components/ListingCard';
 import { SearchBar } from './src/components/SearchBar';
 import { EmptyState } from './src/components/EmptyState';
 import { Loader } from './src/components/Loader';
+import { FilterModal, FilterState } from './src/components/FilterModal';
 
 export default function App() {
   const [favorites, setFavorites] = useState<string[]>(['2', '4']); // Sample pre-favorited listings
@@ -25,6 +26,14 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [filterModalVisible, setFilterModalVisible] = useState<boolean>(false);
+  const [activeFilters, setActiveFilters] = useState<FilterState>({
+    roomType: 'All',
+    minRent: 5000,
+    maxRent: 30000,
+    preferredGender: 'Any',
+    city: 'All',
+  });
 
   // Debounce search query updates to avoid triggering loader on every single keystroke.
   // This delays the filtering/searching until the user has stopped typing for 400ms.
@@ -35,15 +44,15 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Trigger simulated fetch loader when debounced search query or selected category chip changes.
+  // Trigger simulated fetch loader when debounced search query, selected category chip, or modal filters change.
   // This gives a premium network-fetching feel with the animated M loader.
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1000); // Simulated network load duration (750ms)
+    }, 1000); // Simulated network load duration (1000ms)
     return () => clearTimeout(timer);
-  }, [debouncedSearchQuery, selectedCategory]);
+  }, [debouncedSearchQuery, selectedCategory, activeFilters]);
 
   // Toggle favorite handler
   const handleToggleFavorite = (id: string) => {
@@ -55,8 +64,9 @@ export default function App() {
   // Categories based on Mokogo room types
   const categories = ['All', 'Private', 'Shared', 'Furnished', 'Unfurnished'];
 
-  // Combined category chips and debounced text search filtering
+  // Combined category chips, debounced text search, and advanced modal filters
   const filteredListings = sampleListings.filter((listing) => {
+    // 1. Quick Category Chips Filter
     const matchesCategory =
       selectedCategory === 'All' ||
       (selectedCategory === 'Private' && listing.roomType === 'Private') ||
@@ -64,12 +74,30 @@ export default function App() {
       (selectedCategory === 'Furnished' && listing.furnished) ||
       (selectedCategory === 'Unfurnished' && !listing.furnished);
 
+    // 2. Debounced Text Search Query Filter
     const matchesSearch =
       listing.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
       listing.locality.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
       listing.city.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
 
-    return matchesCategory && matchesSearch;
+    // 3. Advanced Filters from Slide-up Modal
+    const matchesModalRoomType =
+      activeFilters.roomType === 'All' ||
+      listing.roomType === activeFilters.roomType;
+
+    const matchesRentRange =
+      listing.rent >= activeFilters.minRent &&
+      listing.rent <= activeFilters.maxRent;
+
+    const matchesGender =
+      activeFilters.preferredGender === 'Any' ||
+      listing.preferredGender === activeFilters.preferredGender;
+
+    const matchesCity =
+      activeFilters.city === 'All' ||
+      listing.city === activeFilters.city;
+
+    return matchesCategory && matchesSearch && matchesModalRoomType && matchesRentRange && matchesGender && matchesCity;
   });
 
   return (
@@ -145,6 +173,41 @@ export default function App() {
         {/* Section Title (matching design image) */}
         <View style={styles.sectionTitleRow}>
           <Text style={styles.sectionTitleText}>Recommend for You</Text>
+          <Pressable
+            style={({ pressed }) => {
+              const hasActiveFilters =
+                activeFilters.roomType !== 'All' ||
+                activeFilters.minRent > 5000 ||
+                activeFilters.maxRent < 30000 ||
+                activeFilters.preferredGender !== 'Any' ||
+                activeFilters.city !== 'All';
+              return [
+                styles.filterIconBtn,
+                pressed && styles.filterIconBtnPressed,
+                hasActiveFilters && styles.filterIconBtnActive,
+              ];
+            }}
+            onPress={() => setFilterModalVisible(true)}
+          >
+            {({ pressed }) => {
+              const hasActiveFilters =
+                activeFilters.roomType !== 'All' ||
+                activeFilters.minRent > 5000 ||
+                activeFilters.maxRent < 30000 ||
+                activeFilters.preferredGender !== 'Any' ||
+                activeFilters.city !== 'All';
+              return (
+                <>
+                  <Feather
+                    name="sliders"
+                    size={16}
+                    color={hasActiveFilters ? theme.brand : theme.textPrimary}
+                  />
+                  {hasActiveFilters && <View style={styles.activeFilterDot} />}
+                </>
+              );
+            }}
+          </Pressable>
         </View>
 
         {/* Listings Feed Cards list or Loader or Empty State */}
@@ -167,6 +230,13 @@ export default function App() {
             onReset={() => {
               setSearchQuery('');
               setSelectedCategory('All');
+              setActiveFilters({
+                roomType: 'All',
+                minRent: 5000,
+                maxRent: 30000,
+                preferredGender: 'Any',
+                city: 'All',
+              });
             }}
           />
         )}
@@ -195,6 +265,13 @@ export default function App() {
           </Pressable>
         </View>
       </View>
+      {/* Advanced Filter Modal Sheet */}
+      <FilterModal
+        visible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        filters={activeFilters}
+        onApply={(newFilters) => setActiveFilters(newFilters)}
+      />
     </SafeAreaView>
   );
 }
@@ -290,6 +367,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   sectionTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     marginBottom: 10,
   },
@@ -297,6 +377,34 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: theme.textPrimary,
+  },
+  filterIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#ECEAE4',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  filterIconBtnPressed: {
+    opacity: 0.8,
+    backgroundColor: '#F5F3ED',
+  },
+  filterIconBtnActive: {
+    borderColor: theme.brand,
+    backgroundColor: theme.brandLight,
+  },
+  activeFilterDot: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: theme.brand,
   },
 
   bottomSpacer: {
