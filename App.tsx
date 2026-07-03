@@ -16,6 +16,7 @@ import { theme } from './src/theme/colors';
 import { sampleListings } from './src/data/sampleData';
 import { ListingCard } from './src/components/ListingCard';
 import { SearchBar } from './src/components/SearchBar';
+import { EmptyState } from './src/components/EmptyState';
 
 export default function App() {
   const [favorites, setFavorites] = useState<string[]>(['2', '4']); // Sample pre-favorited listings
@@ -136,24 +137,14 @@ export default function App() {
             />
           ))
         ) : (
-          <View style={styles.emptyStateContainer}>
-            <View style={styles.emptyStateIconCircle}>
-              <Ionicons name="search-outline" size={32} color={theme.brand} />
-            </View>
-            <Text style={styles.emptyStateTitle}>No listings match your search</Text>
-            <Text style={styles.emptyStateSub}>
-              We couldn't find anything matching "{searchQuery}" in this category. Try adjusting your filters.
-            </Text>
-            <Pressable
-              style={styles.resetSearchButton}
-              onPress={() => {
-                setSearchQuery('');
-                setSelectedCategory('All');
-              }}
-            >
-              <Text style={styles.resetSearchButtonText}>Clear filters</Text>
-            </Pressable>
-          </View>
+          <EmptyState
+            searchQuery={searchQuery}
+            category={selectedCategory}
+            onReset={() => {
+              setSearchQuery('');
+              setSelectedCategory('All');
+            }}
+          />
         )}
 
         {/* Spacer for bottom tab bar padding */}
@@ -283,58 +274,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: theme.textPrimary,
   },
-  emptyStateContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 60,
-  },
-  emptyStateIconCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: theme.brandLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  emptyStateTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: theme.textPrimary,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptyStateSub: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: theme.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 24,
-  },
-  resetSearchButton: {
-    backgroundColor: theme.textPrimary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 24,
-    ...Platform.select({
-      ios: {
-        shadowColor: theme.shadow,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  resetSearchButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-  },
+
   bottomSpacer: {
     height: 40,
   },
