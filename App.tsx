@@ -15,10 +15,12 @@ import { Feather, Ionicons } from '@expo/vector-icons';
 import { theme } from './src/theme/colors';
 import { sampleListings } from './src/data/sampleData';
 import { ListingCard } from './src/components/ListingCard';
+import { SearchBar } from './src/components/SearchBar';
 
 export default function App() {
   const [favorites, setFavorites] = useState<string[]>(['2', '4']); // Sample pre-favorited listings
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Toggle favorite handler
   const handleToggleFavorite = (id: string) => {
@@ -30,9 +32,153 @@ export default function App() {
   // Categories based on Mokogo room types
   const categories = ['All', 'Private', 'Shared', 'Furnished', 'Unfurnished'];
 
+  // Combined search and category filtering
+  const filteredListings = sampleListings.filter((listing) => {
+    const matchesCategory =
+      selectedCategory === 'All' ||
+      (selectedCategory === 'Private' && listing.roomType === 'Private') ||
+      (selectedCategory === 'Shared' && listing.roomType === 'Shared') ||
+      (selectedCategory === 'Furnished' && listing.furnished) ||
+      (selectedCategory === 'Unfurnished' && !listing.furnished);
+
+    const matchesSearch =
+      listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      listing.locality.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      listing.city.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesCategory && matchesSearch;
+  });
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View>
+      <StatusBar style="dark" />
+      
+      {/* Scrollable Main Screen Container */}
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        
+        {/* Top Header Row (matching design image) */}
+        <View style={styles.headerRow}>
+          <Pressable style={styles.iconCircleButton}>
+            <Feather name="menu" size={20} color={theme.textPrimary} />
+          </Pressable>
+          
+          <View style={styles.rightHeaderGroup}>
+            <Pressable style={[styles.iconCircleButton, styles.notificationBtn]}>
+              <Ionicons name="notifications-outline" size={20} color={theme.textPrimary} />
+              <View style={styles.notificationDot} />
+            </Pressable>
+            <Image
+              source={{ uri: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' }}
+              style={styles.avatarImage}
+            />
+          </View>
+        </View>
+
+        {/* Animated Search Bar Component (replaces titleContainer) */}
+        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+
+        {/* Horizontal Category Selector (matching design image) */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoriesContainer}
+        >
+          {categories.map((category) => {
+            const isActive = selectedCategory === category;
+            return (
+              <Pressable
+                key={category}
+                style={[
+                  styles.categoryPill,
+                  isActive && styles.categoryPillActive,
+                ]}
+                onPress={() => setSelectedCategory(category)}
+              >
+                {category !== 'All' && (
+                  <View style={styles.categoryThumbnailContainer}>
+                    <Image
+                      source={{
+                        uri: category.includes('Private')
+                          ? 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=100&q=80'
+                          : 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=100&q=80',
+                      }}
+                      style={styles.categoryThumbnail}
+                    />
+                  </View>
+                )}
+                <Text
+                  style={[
+                    styles.categoryText,
+                    isActive && styles.categoryTextActive,
+                  ]}
+                >
+                  {category}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
+        {/* Section Title (matching design image) */}
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitleText}>Recommend for You</Text>
+        </View>
+
+        {/* Listings Feed Cards list or Empty State */}
+        {filteredListings.length > 0 ? (
+          filteredListings.map((listing) => (
+            <ListingCard
+              key={listing.id}
+              listing={listing}
+              isFavorite={favorites.includes(listing.id)}
+              onFavoritePress={() => handleToggleFavorite(listing.id)}
+              onPress={() => console.log('Tapped listing:', listing.title)}
+            />
+          ))
+        ) : (
+          <View style={styles.emptyStateContainer}>
+            <View style={styles.emptyStateIconCircle}>
+              <Ionicons name="search-outline" size={32} color={theme.brand} />
+            </View>
+            <Text style={styles.emptyStateTitle}>No listings match your search</Text>
+            <Text style={styles.emptyStateSub}>
+              We couldn't find anything matching "{searchQuery}" in this category. Try adjusting your filters.
+            </Text>
+            <Pressable
+              style={styles.resetSearchButton}
+              onPress={() => {
+                setSearchQuery('');
+                setSelectedCategory('All');
+              }}
+            >
+              <Text style={styles.resetSearchButtonText}>Clear filters</Text>
+            </Pressable>
+          </View>
+        )}
+
+        {/* Spacer for bottom tab bar padding */}
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
+
+      {/* Floating Bottom Navigation Tab Bar (matching design image) */}
+      <View style={styles.bottomTabBarContainer}>
+        <View style={styles.bottomTabBar}>
+          <Pressable style={[styles.tabButton, styles.tabButtonActive]}>
+            <Ionicons name="home" size={20} color={theme.textPrimary} />
+          </Pressable>
+          <Pressable style={styles.tabButton}>
+            <Ionicons name="search" size={20} color={theme.textSecondary} />
+          </Pressable>
+          <Pressable style={styles.tabButton}>
+            <Ionicons name="wallet-outline" size={20} color={theme.textSecondary} />
+          </Pressable>
+          <Pressable style={styles.tabButton}>
+            <Ionicons name="calendar-outline" size={20} color={theme.textSecondary} />
+          </Pressable>
+          <Pressable style={styles.tabButton}>
+            <Ionicons name="settings-outline" size={20} color={theme.textSecondary} />
+          </Pressable>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -88,50 +234,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#FFFFFF',
   },
-  titleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    paddingHorizontal: 20,
-    marginTop: 25,
-    marginBottom: 20,
-  },
-  titleTextGroup: {
-    flex: 1,
-  },
-  titleSub: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: theme.textSecondary,
-    marginBottom: 4,
-  },
-  titleMain: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: theme.textPrimary,
-    lineHeight: 34,
-  },
-  searchCircleButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ECEAE4',
-    ...Platform.select({
-      ios: {
-        shadowColor: theme.shadow,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
   categoriesContainer: {
     paddingHorizontal: 20,
     gap: 10,
@@ -180,6 +282,58 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: theme.textPrimary,
+  },
+  emptyStateContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 60,
+  },
+  emptyStateIconCircle: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: theme.brandLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.textPrimary,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptyStateSub: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: theme.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  resetSearchButton: {
+    backgroundColor: theme.textPrimary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: theme.shadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  resetSearchButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
   bottomSpacer: {
     height: 40,
