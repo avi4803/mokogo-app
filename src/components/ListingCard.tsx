@@ -113,3 +113,141 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     </Pressable>
   );
 };
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    backgroundColor: theme.cardBackground,
+    borderRadius: 25,
+    padding: 3,
+    marginVertical: 10,
+    marginHorizontal: 16,
+    borderWidth: 1,
+    borderColor: theme.border,
+    ...Platform.select({
+      ios: {
+        shadowColor: theme.shadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+  cardPressed: {
+    opacity: 0.95,
+    transform: [{ scale: 0.99 }],
+  },
+  imageContainer: {
+    position: 'relative',
+    height: 200,
+    width: '100%',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  badgeOverlay: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: theme.tagBg,
+    paddingHorizontal: 15,
+    paddingVertical: 6,
+    borderRadius: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.textPrimary,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: theme.tagBg,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  buttonPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.9 }],
+  },
+  contentContainer: {
+    paddingHorizontal: 6,
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
+  titlePriceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  titleText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.textPrimary,
+    flex: 1,
+    marginRight: 8,
+  },
+  priceContainer: {
+    backgroundColor: theme.highlightBg,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+  },
+  priceText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: theme.textPrimary,
+  },
+  pillsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  pillContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.outlinePillBorder,
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  pillText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: theme.textSecondary,
+    marginLeft: 4,
+  },
+});

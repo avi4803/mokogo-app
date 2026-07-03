@@ -32,8 +32,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-     <View>
-      <Text>Heyyy</Text>
+      <View>
       </View>
     </SafeAreaView>
   );
