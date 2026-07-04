@@ -27,6 +27,7 @@ export default function App() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [filterModalVisible, setFilterModalVisible] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'Home' | 'Search' | 'Wallet' | 'Calendar' | 'Settings'>('Home');
   const [activeFilters, setActiveFilters] = useState<FilterState>({
     roomType: 'All',
     minRent: 5000,
@@ -104,7 +105,8 @@ export default function App() {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
       
-      {/* Scrollable Main Screen Container */}
+    {/* Main screen content conditional on active tab */}
+    {activeTab === 'Home' ? (
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         
         {/* Top Header Row (matching design image) */}
@@ -244,28 +246,61 @@ export default function App() {
         {/* Spacer for bottom tab bar padding */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
-
-      {/* Floating Bottom Navigation Tab Bar (matching design image) */}
-      <View style={styles.bottomTabBarContainer}>
-        <View style={styles.bottomTabBar}>
-          <Pressable style={[styles.tabButton, styles.tabButtonActive]}>
-            <Ionicons name="home" size={20} color={theme.textPrimary} />
-          </Pressable>
-          <Pressable style={styles.tabButton}>
-            <Ionicons name="search" size={20} color={theme.textSecondary} />
-          </Pressable>
-          <Pressable style={styles.tabButton}>
-            <Ionicons name="wallet-outline" size={20} color={theme.textSecondary} />
-          </Pressable>
-          <Pressable style={styles.tabButton}>
-            <Ionicons name="calendar-outline" size={20} color={theme.textSecondary} />
-          </Pressable>
-          <Pressable style={styles.tabButton}>
-            <Ionicons name="settings-outline" size={20} color={theme.textSecondary} />
-          </Pressable>
+    ) : (
+      /* Centered Title Screen for other un-coded pages */
+      <View style={styles.emptyTabContent}>
+        <View style={styles.emptyTabCircle}>
+          <Ionicons
+            name={
+              activeTab === 'Search' ? 'search-outline' :
+              activeTab === 'Wallet' ? 'wallet-outline' :
+              activeTab === 'Calendar' ? 'calendar-outline' :
+              'settings-outline'
+            }
+            size={36}
+            color={theme.brand}
+          />
         </View>
+        <Text style={styles.emptyTabTitle}>{activeTab}</Text>
+        <Text style={styles.emptyTabSub}>This screen is currently under development.</Text>
       </View>
-      {/* Advanced Filter Modal Sheet */}
+    )}
+
+    {/* Floating Bottom Navigation Tab Bar (matching design image) */}
+    <View style={styles.bottomTabBarContainer}>
+      <View style={styles.bottomTabBar}>
+        <Pressable
+          style={[styles.tabButton, activeTab === 'Home' && styles.tabButtonActive]}
+          onPress={() => setActiveTab('Home')}
+        >
+          <Ionicons name="home" size={20} color={activeTab === 'Home' ? theme.textPrimary : theme.textSecondary} />
+        </Pressable>
+        <Pressable
+          style={[styles.tabButton, activeTab === 'Search' && styles.tabButtonActive]}
+          onPress={() => setActiveTab('Search')}
+        >
+          <Ionicons name="search" size={20} color={activeTab === 'Search' ? theme.textPrimary : theme.textSecondary} />
+        </Pressable>
+        <Pressable
+          style={[styles.tabButton, activeTab === 'Wallet' && styles.tabButtonActive]}
+          onPress={() => setActiveTab('Wallet')}
+        >
+          <Ionicons name="wallet-outline" size={20} color={activeTab === 'Wallet' ? theme.textPrimary : theme.textSecondary} />
+        </Pressable>
+        <Pressable
+          style={[styles.tabButton, activeTab === 'Calendar' && styles.tabButtonActive]}
+          onPress={() => setActiveTab('Calendar')}
+        >
+          <Ionicons name="calendar-outline" size={20} color={activeTab === 'Calendar' ? theme.textPrimary : theme.textSecondary} />
+        </Pressable>
+        <Pressable
+          style={[styles.tabButton, activeTab === 'Settings' && styles.tabButtonActive]}
+          onPress={() => setActiveTab('Settings')}
+        >
+          <Ionicons name="settings-outline" size={20} color={activeTab === 'Settings' ? theme.textPrimary : theme.textSecondary} />
+        </Pressable>
+      </View>
+    </View>{/* Advanced Filter Modal Sheet */}
       <FilterModal
         visible={filterModalVisible}
         onClose={() => setFilterModalVisible(false)}
@@ -281,6 +316,35 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.background,
     paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
+  },
+  emptyTabContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    backgroundColor: 'transparent',
+  },
+  emptyTabCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: theme.brandLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  emptyTabTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: theme.textPrimary,
+    marginBottom: 8,
+  },
+  emptyTabSub: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: theme.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
   },
   scrollContainer: {
     paddingBottom: 90, // extra spacing so content isn't covered by floating tab bar
