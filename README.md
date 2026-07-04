@@ -12,10 +12,10 @@ Here is the visual representation of the implemented high-fidelity prototype (in
 
 ### App Feed & Filters Modal
 <div align="center">
-  <img src="./assets/1.png" width="300" alt="MOKOGO Home Feed Screen" />
-  <img src="./assets/3.png" width="300" alt="MOKOGO Advanced Filters Modal" />
-  <img src="./assets/2.png" width="300" alt="Search" />
-  <img src="./assets/4.png" width="300" alt="Custom loader" />
+  <img src="./assets/1.jpg" width="300" alt="MOKOGO Home Feed Screen" />
+  <img src="./assets/3.jpg" width="300" alt="MOKOGO Advanced Filters Modal" />
+  <img src="./assets/2.jpg" width="300" alt="Search" />
+  <img src="./assets/4.jpg" width="300" alt="Custom loader" />
 </div>
 
 ### 🎥 Screen Recording Demo
