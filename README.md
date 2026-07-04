@@ -12,11 +12,20 @@ Here is the visual representation of the implemented high-fidelity prototype (in
 
 ### App Feed & Filters Modal
 <div align="center">
-  <img src="./assets/feed_screen.png" width="300" alt="MOKOGO Home Feed Screen" />
-  <img src="./assets/filter_modal.png" width="300" alt="MOKOGO Advanced Filters Modal" />
+  <img src="./assets/1.png" width="300" alt="MOKOGO Home Feed Screen" />
+  <img src="./assets/3.png" width="300" alt="MOKOGO Advanced Filters Modal" />
+  <img src="./assets/2.png" width="300" alt="Search" />
+  <img src="./assets/4.png" width="300" alt="Custom loader" />
 </div>
 
-> _Note: Replace the image paths above with your screen recordings or Expo Go simulator screenshots as needed._
+### 🎥 Screen Recording Demo
+<div align="center">
+  <!-- Option 1: HTML5 video tag (For MP4/MOV files placed in assets folder) -->
+  <video src="./assets/record.mp4" width="300" controls muted autoplay loop></video>
+  
+  <!-- Option 2: Animated GIF (Uncomment below if using GIF format) -->
+  <!-- <img src="./assets/demo.gif" width="300" alt="MOKOGO App Interaction Demo" /> -->
+</div>
 
 ---
 
