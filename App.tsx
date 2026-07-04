@@ -1,312 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
-  Text,
   View,
-  ScrollView,
   SafeAreaView,
   StatusBar as RNStatusBar,
-  Image,
   Pressable,
   Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from './src/theme/colors';
-import { sampleListings } from './src/data/sampleData';
-import { ListingCard } from './src/components/ListingCard';
-import { SearchBar } from './src/components/SearchBar';
-import { EmptyState } from './src/components/EmptyState';
-import { Loader } from './src/components/Loader';
-import { FilterModal, FilterState } from './src/components/FilterModal';
+import { HomeScreen } from './src/screens/HomeScreen';
+import { PlaceholderScreen } from './src/screens/PlaceholderScreen';
 
 export default function App() {
-  const [favorites, setFavorites] = useState<string[]>(['2', '4']); // Sample pre-favorited listings
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [filterModalVisible, setFilterModalVisible] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'Home' | 'Search' | 'Wallet' | 'Calendar' | 'Settings'>('Home');
-  const [activeFilters, setActiveFilters] = useState<FilterState>({
-    roomType: 'All',
-    minRent: 5000,
-    maxRent: 30000,
-    preferredGender: 'Any',
-    city: 'All',
-  });
-
-  // Debounce search query updates to avoid triggering loader on every single keystroke.
-  // This delays the filtering/searching until the user has stopped typing for 400ms.
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 400); // 400ms typing delay/debounce duration
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  // Trigger simulated fetch loader when debounced search query, selected category chip, or modal filters change.
-  // This gives a premium network-fetching feel with the animated M loader.
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000); // Simulated network load duration (1000ms)
-    return () => clearTimeout(timer);
-  }, [debouncedSearchQuery, selectedCategory, activeFilters]);
-
-  // Toggle favorite handler
-  const handleToggleFavorite = (id: string) => {
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id]
-    );
-  };
-
-  // Categories based on Mokogo room types
-  const categories = ['All', 'Private', 'Shared', 'Furnished', 'Unfurnished'];
-
-  // Combined category chips, debounced text search, and advanced modal filters
-  const filteredListings = sampleListings.filter((listing) => {
-    // 1. Quick Category Chips Filter
-    const matchesCategory =
-      selectedCategory === 'All' ||
-      (selectedCategory === 'Private' && listing.roomType === 'Private') ||
-      (selectedCategory === 'Shared' && listing.roomType === 'Shared') ||
-      (selectedCategory === 'Furnished' && listing.furnished) ||
-      (selectedCategory === 'Unfurnished' && !listing.furnished);
-
-    // 2. Debounced Text Search Query Filter
-    const matchesSearch =
-      listing.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-      listing.locality.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-      listing.city.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
-
-    // 3. Advanced Filters from Slide-up Modal
-    const matchesModalRoomType =
-      activeFilters.roomType === 'All' ||
-      listing.roomType === activeFilters.roomType;
-
-    const matchesRentRange =
-      listing.rent >= activeFilters.minRent &&
-      listing.rent <= activeFilters.maxRent;
-
-    const matchesGender =
-      activeFilters.preferredGender === 'Any' ||
-      listing.preferredGender === activeFilters.preferredGender;
-
-    const matchesCity =
-      activeFilters.city === 'All' ||
-      listing.city === activeFilters.city;
-
-    return matchesCategory && matchesSearch && matchesModalRoomType && matchesRentRange && matchesGender && matchesCity;
-  });
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
       
-    {/* Main screen content conditional on active tab */}
-    {activeTab === 'Home' ? (
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        
-        {/* Top Header Row (matching design image) */}
-        <View style={styles.headerRow}>
-          <Pressable style={styles.iconCircleButton}>
-            <Feather name="menu" size={20} color={theme.textPrimary} />
-          </Pressable>
-          
-          <View style={styles.rightHeaderGroup}>
-            <Pressable style={[styles.iconCircleButton, styles.notificationBtn]}>
-              <Ionicons name="notifications-outline" size={20} color={theme.textPrimary} />
-              <View style={styles.notificationDot} />
-            </Pressable>
-            <Image
-              source={{ uri: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' }}
-              style={styles.avatarImage}
-            />
-          </View>
-        </View>
+      {/* Screen Router Switcher */}
+      <View style={styles.screenContainer}>
+        {activeTab === 'Home' && <HomeScreen />}
+        {activeTab === 'Search' && <PlaceholderScreen title="Search" iconName="search-outline" />}
+        {activeTab === 'Wallet' && <PlaceholderScreen title="Wallet" iconName="wallet-outline" />}
+        {activeTab === 'Calendar' && <PlaceholderScreen title="Calendar" iconName="calendar-outline" />}
+        {activeTab === 'Settings' && <PlaceholderScreen title="Settings" iconName="settings-outline" />}
+      </View>
 
-        {/* Animated Search Bar Component (replaces titleContainer) */}
-        <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
-
-        {/* Horizontal Category Selector (matching design image) */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoriesContainer}
-        >
-          {categories.map((category) => {
-            const isActive = selectedCategory === category;
-            return (
-              <Pressable
-                key={category}
-                style={[
-                  styles.categoryPill,
-                  isActive && styles.categoryPillActive,
-                ]}
-                onPress={() => setSelectedCategory(category)}
-              >
-                {category !== 'All' && (
-                  <View style={styles.categoryThumbnailContainer}>
-                    <Image
-                      source={{
-                        uri: category.includes('Private')
-                          ? 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=100&q=80'
-                          : 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=100&q=80',
-                      }}
-                      style={styles.categoryThumbnail}
-                    />
-                  </View>
-                )}
-                <Text
-                  style={[
-                    styles.categoryText,
-                    isActive && styles.categoryTextActive,
-                  ]}
-                >
-                  {category}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        {/* Section Title (matching design image) */}
-        <View style={styles.sectionTitleRow}>
-          <Text style={styles.sectionTitleText}>Recommend for You</Text>
+      {/* Floating Bottom Navigation Tab Bar (matching design image mockup) */}
+      <View style={styles.bottomTabBarContainer}>
+        <View style={styles.bottomTabBar}>
           <Pressable
-            style={({ pressed }) => {
-              const hasActiveFilters =
-                activeFilters.roomType !== 'All' ||
-                activeFilters.minRent > 5000 ||
-                activeFilters.maxRent < 30000 ||
-                activeFilters.preferredGender !== 'Any' ||
-                activeFilters.city !== 'All';
-              return [
-                styles.filterIconBtn,
-                pressed && styles.filterIconBtnPressed,
-                hasActiveFilters && styles.filterIconBtnActive,
-              ];
-            }}
-            onPress={() => setFilterModalVisible(true)}
+            style={[styles.tabButton, activeTab === 'Home' && styles.tabButtonActive]}
+            onPress={() => setActiveTab('Home')}
           >
-            {({ pressed }) => {
-              const hasActiveFilters =
-                activeFilters.roomType !== 'All' ||
-                activeFilters.minRent > 5000 ||
-                activeFilters.maxRent < 30000 ||
-                activeFilters.preferredGender !== 'Any' ||
-                activeFilters.city !== 'All';
-              return (
-                <>
-                  <Feather
-                    name="sliders"
-                    size={16}
-                    color={hasActiveFilters ? theme.brand : theme.textPrimary}
-                  />
-                  {hasActiveFilters && <View style={styles.activeFilterDot} />}
-                </>
-              );
-            }}
+            <Ionicons name="home" size={20} color={activeTab === 'Home' ? theme.textPrimary : theme.textSecondary} />
+          </Pressable>
+          <Pressable
+            style={[styles.tabButton, activeTab === 'Search' && styles.tabButtonActive]}
+            onPress={() => setActiveTab('Search')}
+          >
+            <Ionicons name="search" size={20} color={activeTab === 'Search' ? theme.textPrimary : theme.textSecondary} />
+          </Pressable>
+          <Pressable
+            style={[styles.tabButton, activeTab === 'Wallet' && styles.tabButtonActive]}
+            onPress={() => setActiveTab('Wallet')}
+          >
+            <Ionicons name="wallet-outline" size={20} color={activeTab === 'Wallet' ? theme.textPrimary : theme.textSecondary} />
+          </Pressable>
+          <Pressable
+            style={[styles.tabButton, activeTab === 'Calendar' && styles.tabButtonActive]}
+            onPress={() => setActiveTab('Calendar')}
+          >
+            <Ionicons name="calendar-outline" size={20} color={activeTab === 'Calendar' ? theme.textPrimary : theme.textSecondary} />
+          </Pressable>
+          <Pressable
+            style={[styles.tabButton, activeTab === 'Settings' && styles.tabButtonActive]}
+            onPress={() => setActiveTab('Settings')}
+          >
+            <Ionicons name="settings-outline" size={20} color={activeTab === 'Settings' ? theme.textPrimary : theme.textSecondary} />
           </Pressable>
         </View>
-
-        {/* Listings Feed Cards list or Loader or Empty State */}
-        {isLoading ? (
-          <Loader message={searchQuery ? `Searching for "${searchQuery}"...` : "Refreshing listings..."} />
-        ) : filteredListings.length > 0 ? (
-          filteredListings.map((listing) => (
-            <ListingCard
-              key={listing.id}
-              listing={listing}
-              isFavorite={favorites.includes(listing.id)}
-              onFavoritePress={() => handleToggleFavorite(listing.id)}
-              onPress={() => console.log('Tapped listing:', listing.title)}
-            />
-          ))
-        ) : (
-          <EmptyState
-            searchQuery={searchQuery}
-            category={selectedCategory}
-            onReset={() => {
-              setSearchQuery('');
-              setSelectedCategory('All');
-              setActiveFilters({
-                roomType: 'All',
-                minRent: 5000,
-                maxRent: 30000,
-                preferredGender: 'Any',
-                city: 'All',
-              });
-            }}
-          />
-        )}
-
-        {/* Spacer for bottom tab bar padding */}
-        <View style={styles.bottomSpacer} />
-      </ScrollView>
-    ) : (
-      /* Centered Title Screen for other un-coded pages */
-      <View style={styles.emptyTabContent}>
-        <View style={styles.emptyTabCircle}>
-          <Ionicons
-            name={
-              activeTab === 'Search' ? 'search-outline' :
-              activeTab === 'Wallet' ? 'wallet-outline' :
-              activeTab === 'Calendar' ? 'calendar-outline' :
-              'settings-outline'
-            }
-            size={36}
-            color={theme.brand}
-          />
-        </View>
-        <Text style={styles.emptyTabTitle}>{activeTab}</Text>
-        <Text style={styles.emptyTabSub}>This screen is currently under development.</Text>
       </View>
-    )}
-
-    {/* Floating Bottom Navigation Tab Bar (matching design image) */}
-    <View style={styles.bottomTabBarContainer}>
-      <View style={styles.bottomTabBar}>
-        <Pressable
-          style={[styles.tabButton, activeTab === 'Home' && styles.tabButtonActive]}
-          onPress={() => setActiveTab('Home')}
-        >
-          <Ionicons name="home" size={20} color={activeTab === 'Home' ? theme.textPrimary : theme.textSecondary} />
-        </Pressable>
-        <Pressable
-          style={[styles.tabButton, activeTab === 'Search' && styles.tabButtonActive]}
-          onPress={() => setActiveTab('Search')}
-        >
-          <Ionicons name="search" size={20} color={activeTab === 'Search' ? theme.textPrimary : theme.textSecondary} />
-        </Pressable>
-        <Pressable
-          style={[styles.tabButton, activeTab === 'Wallet' && styles.tabButtonActive]}
-          onPress={() => setActiveTab('Wallet')}
-        >
-          <Ionicons name="wallet-outline" size={20} color={activeTab === 'Wallet' ? theme.textPrimary : theme.textSecondary} />
-        </Pressable>
-        <Pressable
-          style={[styles.tabButton, activeTab === 'Calendar' && styles.tabButtonActive]}
-          onPress={() => setActiveTab('Calendar')}
-        >
-          <Ionicons name="calendar-outline" size={20} color={activeTab === 'Calendar' ? theme.textPrimary : theme.textSecondary} />
-        </Pressable>
-        <Pressable
-          style={[styles.tabButton, activeTab === 'Settings' && styles.tabButtonActive]}
-          onPress={() => setActiveTab('Settings')}
-        >
-          <Ionicons name="settings-outline" size={20} color={activeTab === 'Settings' ? theme.textPrimary : theme.textSecondary} />
-        </Pressable>
-      </View>
-    </View>{/* Advanced Filter Modal Sheet */}
-      <FilterModal
-        visible={filterModalVisible}
-        onClose={() => setFilterModalVisible(false)}
-        filters={activeFilters}
-        onApply={(newFilters) => setActiveFilters(newFilters)}
-      />
     </SafeAreaView>
   );
 }
@@ -317,162 +74,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.background,
     paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
-  emptyTabContent: {
+  screenContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-    backgroundColor: 'transparent',
-  },
-  emptyTabCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: theme.brandLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  emptyTabTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: theme.textPrimary,
-    marginBottom: 8,
-  },
-  emptyTabSub: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: theme.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  scrollContainer: {
-    paddingBottom: 90, // extra spacing so content isn't covered by floating tab bar
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginTop: 15,
-  },
-  rightHeaderGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  iconCircleButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ECEAE4',
-  },
-  notificationBtn: {
-    position: 'relative',
-  },
-  notificationDot: {
-    position: 'absolute',
-    top: 12,
-    right: 13,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#4CAF50',
-  },
-  avatarImage: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
-  },
-  categoriesContainer: {
-    paddingHorizontal: 20,
-    gap: 10,
-    marginBottom: 25,
-    height: 44,
-  },
-  categoryPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#ECEAE4',
-    borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
-  },
-  categoryPillActive: {
-    backgroundColor: '#EFFF8C', // Soft accent highlight color similar to selected 'All' in design image
-    borderColor: '#E2F183',
-  },
-  categoryThumbnailContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginRight: 8,
-  },
-  categoryThumbnail: {
-    width: '100%',
-    height: '100%',
-  },
-  categoryText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.textPrimary,
-  },
-  categoryTextActive: {
-    fontWeight: '700',
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 10,
-  },
-  sectionTitleText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: theme.textPrimary,
-  },
-  filterIconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#ECEAE4',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  filterIconBtnPressed: {
-    opacity: 0.8,
-    backgroundColor: '#F5F3ED',
-  },
-  filterIconBtnActive: {
-    borderColor: theme.brand,
-    backgroundColor: theme.brandLight,
-  },
-  activeFilterDot: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: theme.brand,
-  },
-
-  bottomSpacer: {
-    height: 40,
   },
   bottomTabBarContainer: {
     position: 'absolute',
@@ -512,6 +115,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabButtonActive: {
-    backgroundColor: '#EFFF8C', // Highlighted tab matching 'All' chip
+    backgroundColor: '#EFFF8C', // Accent tab circular highlight
   },
 });

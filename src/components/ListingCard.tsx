@@ -1,5 +1,6 @@
-import React from 'react';
-import { StyleSheet, Text, View, Image, Pressable, Platform } from 'react-native';
+import React, { memo } from 'react';
+import { StyleSheet, Text, View, Pressable, Platform } from 'react-native';
+import { Image } from 'expo-image';
 import { Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Listing } from '../types/listing';
 import { theme } from '../theme/colors';
@@ -11,12 +12,12 @@ interface ListingCardProps {
   onFavoritePress?: () => void;
 }
 
-export const ListingCard: React.FC<ListingCardProps> = ({
+export const ListingCard = memo(({
   listing,
   isFavorite = false,
   onPress,
   onFavoritePress,
-}) => {
+}: ListingCardProps) => {
   // Format rent value to Indian numbering system (e.g., 12,000)
   const formattedRent = new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: 0,
@@ -37,7 +38,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             uri: listing.image || 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80',
           }}
           style={styles.image}
-          resizeMode="cover"
+          contentFit="cover"
+          transition={200}
         />
 
         {/* Top-Left Badge overlay: Best Deal (similar to screen image) */}
@@ -112,7 +114,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({
       </View>
     </Pressable>
   );
-};
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.isFavorite === nextProps.isFavorite &&
+    prevProps.listing.id === nextProps.listing.id
+  );
+});
 
 const styles = StyleSheet.create({
   cardContainer: {
