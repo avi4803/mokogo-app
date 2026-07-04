@@ -12,19 +12,26 @@ Here is the visual representation of the implemented high-fidelity prototype (in
 
 ### App Feed & Filters Modal
 <div align="center">
-  <img src="./assets/1.jpg" width="300" alt="MOKOGO Home Feed Screen" />
-  <img src="./assets/3.jpg" width="300" alt="MOKOGO Advanced Filters Modal" />
-  <img src="./assets/2.jpg" width="300" alt="Search" />
-  <img src="./assets/4.jpg" width="300" alt="Custom loader" />
+  <img src="./assets/1.jpg" width="23%" alt="MOKOGO Home Feed Screen" />
+  <img src="./assets/3.jpg" width="23%" alt="MOKOGO Advanced Filters Modal" />
+  <img src="./assets/2.jpg" width="23%" alt="Search" />
+  <img src="./assets/4.jpg" width="23%" alt="Custom loader" />
 </div>
 
 ### 🎥 Screen Recording Demo
 <div align="center">
-  <!-- Option 1: HTML5 video tag (For MP4/MOV files placed in assets folder) -->
-  <video src="./assets/record.mp4" width="300" controls muted autoplay loop></video>
+  <!-- GitHub Restriction: Relative video paths like ./assets/record.mp4 do not play on GitHub. -->
+  <!-- TO FIX: Drag and drop record.mp4 into the online GitHub editor, copy the generated https URL, and paste it below: -->
+  <video src="https://github.com/avi4803/mokogo-app/blob/main/assets/record.mp4" width="350" controls muted autoplay loop></video>
   
-  <!-- Option 2: Animated GIF (Uncomment below if using GIF format) -->
-  <!-- <img src="./assets/demo.gif" width="300" alt="MOKOGO App Interaction Demo" /> -->
+  <p align="left">
+    💡 <strong>Note on GitHub Video Playback:</strong> Local relative video paths (e.g., <code>./assets/record.mp4</code>) inside HTML5 <code>&lt;video&gt;</code> tags are blocked by GitHub's security policies. To show your video:<br/>
+    1. Go to your GitHub repository in your browser.<br/>
+    2. Click the pencil icon to edit <code>README.md</code>.<br/>
+    3. Drag and drop <code>assets/record.mp4</code> directly into the text editor.<br/>
+    4. GitHub will upload it and generate an attachment link (starts with <code>https://github.com/user-attachments/assets/...</code>).<br/>
+    5. Copy that URL and paste it into the <code>src</code> attribute of the video tag above!
+  </p>
 </div>
 
 ---
