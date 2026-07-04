@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
-  SafeAreaView,
   StatusBar as RNStatusBar,
   Pressable,
   Platform,
   Animated,
 } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from './src/theme/colors';
@@ -51,67 +51,69 @@ export default function App() {
   });
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
-      
-      {/* Screen Router Switcher */}
-      <View style={styles.screenContainer}>
-        {activeTab === 'Home' && <HomeScreen />}
-        {activeTab === 'Search' && <PlaceholderScreen title="Search" iconName="search-outline" />}
-        {activeTab === 'Wallet' && <PlaceholderScreen title="Wallet" iconName="wallet-outline" />}
-        {activeTab === 'Calendar' && <PlaceholderScreen title="Calendar" iconName="calendar-outline" />}
-        {activeTab === 'Settings' && <PlaceholderScreen title="Settings" iconName="settings-outline" />}
-      </View>
-
-      {/* Floating Bottom Navigation Tab Bar (matching design image mockup) */}
-      <View style={styles.bottomTabBarContainer}>
-        <View 
-          style={styles.bottomTabBar}
-          onLayout={(e) => setTabBarWidth(e.nativeEvent.layout.width - 16)} // Subtract paddingHorizontal (8 * 2)
-        >
-          {/* Fluid Sliding Active Tab Indicator (runs on native UI thread) */}
-          {tabBarWidth > 0 && (
-            <Animated.View
-              style={[
-                styles.activeTabIndicator,
-                { transform: [{ translateX }] },
-              ]}
-            />
-          )}
-
-          <Pressable
-            style={styles.tabButton}
-            onPress={() => setActiveTab('Home')}
-          >
-            <Ionicons name="home" size={20} color={activeTab === 'Home' ? theme.textPrimary : theme.textSecondary} />
-          </Pressable>
-          <Pressable
-            style={styles.tabButton}
-            onPress={() => setActiveTab('Search')}
-          >
-            <Ionicons name="search" size={20} color={activeTab === 'Search' ? theme.textPrimary : theme.textSecondary} />
-          </Pressable>
-          <Pressable
-            style={styles.tabButton}
-            onPress={() => setActiveTab('Wallet')}
-          >
-            <Ionicons name="wallet-outline" size={20} color={activeTab === 'Wallet' ? theme.textPrimary : theme.textSecondary} />
-          </Pressable>
-          <Pressable
-            style={styles.tabButton}
-            onPress={() => setActiveTab('Calendar')}
-          >
-            <Ionicons name="calendar-outline" size={20} color={activeTab === 'Calendar' ? theme.textPrimary : theme.textSecondary} />
-          </Pressable>
-          <Pressable
-            style={styles.tabButton}
-            onPress={() => setActiveTab('Settings')}
-          >
-            <Ionicons name="settings-outline" size={20} color={activeTab === 'Settings' ? theme.textPrimary : theme.textSecondary} />
-          </Pressable>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar style="dark" />
+        
+        {/* Screen Router Switcher */}
+        <View style={styles.screenContainer}>
+          {activeTab === 'Home' && <HomeScreen />}
+          {activeTab === 'Search' && <PlaceholderScreen title="Search" iconName="search-outline" />}
+          {activeTab === 'Wallet' && <PlaceholderScreen title="Wallet" iconName="wallet-outline" />}
+          {activeTab === 'Calendar' && <PlaceholderScreen title="Calendar" iconName="calendar-outline" />}
+          {activeTab === 'Settings' && <PlaceholderScreen title="Settings" iconName="settings-outline" />}
         </View>
-      </View>
-    </SafeAreaView>
+
+        {/* Floating Bottom Navigation Tab Bar (matching design image mockup) */}
+        <View style={styles.bottomTabBarContainer}>
+          <View 
+            style={styles.bottomTabBar}
+            onLayout={(e) => setTabBarWidth(e.nativeEvent.layout.width - 16)} // Subtract paddingHorizontal (8 * 2)
+          >
+            {/* Fluid Sliding Active Tab Indicator (runs on native UI thread) */}
+            {tabBarWidth > 0 && (
+              <Animated.View
+                style={[
+                  styles.activeTabIndicator,
+                  { transform: [{ translateX }] },
+                ]}
+              />
+            )}
+
+            <Pressable
+              style={styles.tabButton}
+              onPress={() => setActiveTab('Home')}
+            >
+              <Ionicons name="home" size={20} color={activeTab === 'Home' ? theme.textPrimary : theme.textSecondary} />
+            </Pressable>
+            <Pressable
+              style={styles.tabButton}
+              onPress={() => setActiveTab('Search')}
+            >
+              <Ionicons name="search" size={20} color={activeTab === 'Search' ? theme.textPrimary : theme.textSecondary} />
+            </Pressable>
+            <Pressable
+              style={styles.tabButton}
+              onPress={() => setActiveTab('Wallet')}
+            >
+              <Ionicons name="wallet-outline" size={20} color={activeTab === 'Wallet' ? theme.textPrimary : theme.textSecondary} />
+            </Pressable>
+            <Pressable
+              style={styles.tabButton}
+              onPress={() => setActiveTab('Calendar')}
+            >
+              <Ionicons name="calendar-outline" size={20} color={activeTab === 'Calendar' ? theme.textPrimary : theme.textSecondary} />
+            </Pressable>
+            <Pressable
+              style={styles.tabButton}
+              onPress={() => setActiveTab('Settings')}
+            >
+              <Ionicons name="settings-outline" size={20} color={activeTab === 'Settings' ? theme.textPrimary : theme.textSecondary} />
+            </Pressable>
+          </View>
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -119,7 +121,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: theme.background,
-    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
   screenContainer: {
     flex: 1,
